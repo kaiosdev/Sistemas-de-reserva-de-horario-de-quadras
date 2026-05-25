@@ -1,4 +1,4 @@
--- Criação do Banco de Dados do projeto Athletix SI
+-- Criação do Banco de Dados do projeto Athletix
 CREATE DATABASE IF NOT EXISTS athletix_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
 -- Seleção do Banco de Dados
