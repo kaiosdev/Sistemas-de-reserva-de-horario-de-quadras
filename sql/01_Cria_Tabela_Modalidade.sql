@@ -1,9 +1,11 @@
--- Cria o banco de dados e define o uso dele
-CREATE DATABASE IF NOT EXISTS athletix_db;
+-- Criação do Banco de Dados do projeto Athletix SI
+CREATE DATABASE IF NOT EXISTS athletix_db CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+
+-- Seleção do Banco de Dados
 USE athletix_db;
 
--- Cria a tabela base de Modalidades
+-- Criação da Tabela de Modalidade
 CREATE TABLE Modalidade (
     id_modalidade INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(50) NOT NULL
+    nome VARCHAR(100) NOT NULL
 );
