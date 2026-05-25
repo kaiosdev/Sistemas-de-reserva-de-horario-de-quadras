@@ -1,26 +1,30 @@
 USE athletix_db;
 
-DELIMITER //
+DELIMITER $$
 
--- Cria a trigger para validação de conflito e choque de hráros
-CREATE TRIGGER tg_valida_choque_horario
+CREATE TRIGGER trg_valida_choque_horario
 BEFORE INSERT ON Agendamento
 FOR EACH ROW
 BEGIN
     DECLARE conflitos INT;
 
-    -- Verifica se já existe um agendamento no mesmo espaço que cruza com o novo horário
+    -- Verifica se o horário que o cliente quer já está ocupado naquele espaço e dia
     SELECT COUNT(*) INTO conflitos
     FROM Agendamento
     WHERE id_espaco = NEW.id_espaco
-      AND (NEW.data_hora_inicio < data_hora_fim AND NEW.data_hora_fim > data_hora_inicio);
+      AND data_reserva = NEW.data_reserva
+      AND (
+          (NEW.hora_inicio >= hora_inicio AND NEW.hora_inicio < hora_fim) OR
+          (NEW.hora_fim > hora_inicio AND NEW.hora_fim <= hora_fim) OR
+          (NEW.hora_inicio <= hora_inicio AND NEW.hora_fim >= hora_fim)
+      );
 
-    -- Bloqueia a inserção se houver sobreposição
+    -- Se achar algum conflito, aborta o insert e lança erro
     IF conflitos > 0 THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Erro de Regra de Negócio: Choque de horários detectado para o espaço selecionado.';
+        SET MESSAGE_TEXT = 'Erro: A quadra ja possui reserva neste horario!';
     END IF;
-END;
-//
+
+END$$
 
 DELIMITER ;
