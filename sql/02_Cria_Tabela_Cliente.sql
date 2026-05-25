@@ -1,8 +1,11 @@
+-- Seleção do Banco de Dados para garantir que a tabela vá para o lugar certo
 USE athletix_db;
 
--- Cria a tabela base de Clientes
+-- Criação da Tabela de Clientes
 CREATE TABLE Cliente (
     id_cliente INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
+    nome VARCHAR(150) NOT NULL,
+    cpf VARCHAR(14) UNIQUE NOT NULL,
+    telefone VARCHAR(15),
     email VARCHAR(100) UNIQUE NOT NULL
 );
