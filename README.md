@@ -10,9 +10,9 @@
 ## 👥 Equipa de Desenvolvimento
 A divisão do projeto foi planeada para garantir um ambiente colaborativo e sem conflitos de versionamento, distribuindo responsabilidades na construção da base de dados:
 
-* **Kaio Sobral Moreira** (`Membro 1 - O Construtor Base`): Responsável pela infraestrutura, repositório e criação das entidades primárias independentes.
-* **Ricky Brendon da Silva Almeida** (`Membro 2 - O Arquiteto das Linhas`): Responsável pelo Modelo Conceitual (DER), Modelo Lógico e criação das tabelas dependentes (com Chaves Estrangeiras).
-* **[Nome do Membro 3]** (`Membro 3 - O Guardião das Regras`): Responsável pela consolidação da documentação (PDF), implementação do módulo financeiro e codificação das regras de negócio complexas (Triggers).
+* **Kaio Sobral Moreira** : Responsável pela infraestrutura, repositório e criação das entidades primárias independentes.
+* **Ricky Brendon da Silva Almeida**: Responsável pelo Modelo Conceitual (DER), Modelo Lógico e criação das tabelas dependentes (com Chaves Estrangeiras).
+* **Jean Carlos dos Santos Baraúna** : Responsável pela consolidação da documentação (PDF), implementação do módulo financeiro e codificação das regras de negócio complexas (Triggers).
 
 ---
 
