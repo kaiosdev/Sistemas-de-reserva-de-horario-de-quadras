@@ -2,11 +2,6 @@
 
 > Projeto prático de modelagem e implementação de uma base de dados relacional para gestão de reservas de espaços desportivos.
 
-## 🎓 Contexto Académico
-- **Instituição:** Universidade Federal do Amazonas (UFAM) - ICET
-- **Disciplina:** Sistemas de Banco de Dados I
-- **Professor:** Dr. Edson de Araújo Silva
-
 ## 👥 Equipa de Desenvolvimento
 A divisão do projeto foi planeada para garantir um ambiente colaborativo e sem conflitos de versionamento, distribuindo responsabilidades na construção da base de dados:
 
