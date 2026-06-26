@@ -1,3 +1,5 @@
+-- SCRIPT DE CRIACAO DO BANCO DE DADOS ATHLETIX
+
 CREATE TABLE Modalidade (
     id_modalidade SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL
@@ -7,18 +9,21 @@ CREATE TABLE Cliente (
     id_cliente SERIAL PRIMARY KEY,
     nome VARCHAR(150) NOT NULL,
     cpf VARCHAR(14) UNIQUE NOT NULL,
-    telefone VARCHAR(15),
-    email VARCHAR(100) UNIQUE NOT NULL
+    endereco VARCHAR(255),
+    telefone VARCHAR(15)
 );
 
 CREATE TABLE Espaco (
     id_espaco SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    tamanho_quadra VARCHAR(50),
     valor_hora DECIMAL(10, 2) NOT NULL,
     id_modalidade INT NOT NULL,
     FOREIGN KEY (id_modalidade) REFERENCES Modalidade (id_modalidade)
 );
 
+-- Entidade Associativa que resolve a relacao N:N entre Cliente e Espaco
 CREATE TABLE Agendamento (
     id_agendamento SERIAL PRIMARY KEY,
     data_reserva DATE NOT NULL,
@@ -39,6 +44,7 @@ CREATE TABLE Pagamento (
     FOREIGN KEY (id_agendamento) REFERENCES Agendamento (id_agendamento) ON DELETE CASCADE
 );
 
+-- TRIGGER DE VALIDACAO DE CHOQUE DE HORARIOS
 CREATE OR REPLACE FUNCTION func_valida_choque_horario()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -55,7 +61,7 @@ BEGIN
       );
 
     IF conflitos > 0 THEN
-        RAISE EXCEPTION 'Erro: O espaço já possui reserva neste horário!';
+        RAISE EXCEPTION 'Erro: O espaco ja possui reserva neste horario!';
     END IF;
 
     RETURN NEW;
