@@ -1,70 +1,15 @@
-import sys
-from services.cliente_service import ClienteService
-from models.pagamento import PagamentoPix, PagamentoCartao
-
-def exibir_menu():
-    print("\n" + "="*40)
-    print("--- ATHLETIX - GESTAO ESPORTIVA ---")
-    print("="*40)
-    print("1. Cadastrar Cliente via Texto (Named Constructor)")
-    print("2. Listar Clientes")
-    print("3. Atualizar Cliente")
-    print("4. Deletar Cliente")
-    print("5. Testar Polimorfismo de Pagamento")
-    print("0. Sair")
-    print("="*40)
+import tkinter as tk
+from ui.interface import AthletixApp
 
 def main():
-    cliente_service = ClienteService()
-
-    while True:
-        exibir_menu()
-        opcao = input("Escolha uma opcao: ")
-
-        if opcao == '1':
-            print("\n--- NOVO CADASTRO VIA TEXTO ---")
-            print("Formato esperado: ID, Nome, CPF, Endereco, Telefone")
-            print("Exemplo: 0, Joao Silva, 12345678900, Rua das Flores 123, 92999999999")
-            texto_entrada = input("Digite os dados: ")
-            cliente_service.cadastrar_cliente_texto(texto_entrada)
-
-        elif opcao == '2':
-            print("\n--- LISTA DE CLIENTES ---")
-            clientes = cliente_service.listar_clientes()
-            if not clientes:
-                print("Nenhum cliente cadastrado.")
-            else:
-                for cli in clientes:
-                    print(cli)
-
-        elif opcao == '3':
-            print("\n--- ATUALIZAR CLIENTE ---")
-            cpf = input("Informe o CPF do cliente que deseja atualizar: ")
-            nome = input("Novo Nome: ")
-            endereco = input("Novo Endereco: ")
-            telefone = input("Novo Telefone: ")
-            cliente_service.atualizar_cliente(nome, cpf, endereco, telefone)
-
-        elif opcao == '4':
-            print("\n--- DELETAR CLIENTE ---")
-            cpf = input("Informe o CPF do cliente a ser deletado: ")
-            cliente_service.deletar_cliente(cpf)
-
-        elif opcao == '5':
-            print("\n--- TESTE DE POLIMORFISMO ---")
-            pag_pix = PagamentoPix(id_pagamento=1, valor_total=150.00, id_agendamento=101, chave_pix="123.456.789-00")
-            pag_cartao = PagamentoCartao(id_pagamento=2, valor_total=300.00, id_agendamento=102, final_cartao="4321")
-            
-            lista_pagamentos = [pag_pix, pag_cartao]
-            for pag in lista_pagamentos:
-                pag.processar()
-
-        elif opcao == '0':
-            print("Saindo do Athletix...")
-            sys.exit()
-            
-        else:
-            print("Opcao invalida. Tente novamente.")
+    # Inicializa a janela principal do Tkinter
+    root = tk.Tk()
+    
+    # Instancia a classe que desenha a interface passando a janela root
+    app = AthletixApp(root)
+    
+    # Inicia o loop de eventos para manter a tela aberta
+    root.mainloop()
 
 if __name__ == "__main__":
     main()
