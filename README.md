@@ -85,5 +85,5 @@ DB_PASSWORD=sua_senha_do_pgadmin</code></pre>
 <h2>Professores Orientadores</h2>
 <ul>
   <li><strong>Prof. Edson de Araújo Silva</strong> (Sistemas de Banco de Dados I)</li>
-  <li><strong>Prof. Alternei Brito</strong> (Engenharia de Software e Sistemas de Informação)</li>
+  <li><strong>Prof. Alternei Brito</strong> (Programação Orientada a Objetos)</li>
 </ul>
