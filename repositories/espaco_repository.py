@@ -1,14 +1,14 @@
 from database.connection import get_connection
-from models.cliente import Cliente
+from models.espaco import Espaco
 
-class ClienteRepository:
-    def inserir(self, cliente: Cliente):
+class EspacoRepository:
+    def inserir(self, espaco: Espaco):
         conexao = get_connection()
         if conexao:
             try:
                 cursor = conexao.cursor()
-                sql = "INSERT INTO Cliente (nome, cpf, endereco, telefone) VALUES (%s, %s, %s, %s)"
-                valores = (cliente.nome, cliente.cpf, cliente.endereco, cliente.telefone)
+                sql = "INSERT INTO Espaco (nome, descricao, tamanho_quadra, valor_hora, id_modalidade) VALUES (%s, %s, %s, %s, 1)"
+                valores = (espaco.nome, espaco.descricao, espaco.tamanho_quadra, espaco.valor_hora)
                 cursor.execute(sql, valores)
                 conexao.commit()
             finally:
@@ -17,15 +17,15 @@ class ClienteRepository:
 
     def listar_todos(self):
         conexao = get_connection()
-        clientes = []
+        espacos = []
         if conexao:
             try:
                 cursor = conexao.cursor()
-                sql = "SELECT id_cliente, nome, cpf, endereco, telefone FROM Cliente"
+                sql = "SELECT id_espaco, nome, descricao, tamanho_quadra, valor_hora FROM Espaco"
                 cursor.execute(sql)
                 for linha in cursor.fetchall():
-                    clientes.append(Cliente(linha[0], linha[1], linha[2], linha[3], linha[4]))
+                    espacos.append(Espaco(linha[0], linha[1], linha[2], linha[3], float(linha[4])))
             finally:
                 cursor.close()
                 conexao.close()
-        return clientes
+        return espacos

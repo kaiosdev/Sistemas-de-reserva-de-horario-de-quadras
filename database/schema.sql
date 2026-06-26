@@ -1,5 +1,3 @@
--- SCRIPT DE CRIACAO DO BANCO DE DADOS ATHLETIX
-
 CREATE TABLE Modalidade (
     id_modalidade SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL
@@ -23,7 +21,6 @@ CREATE TABLE Espaco (
     FOREIGN KEY (id_modalidade) REFERENCES Modalidade (id_modalidade)
 );
 
--- Entidade Associativa que resolve a relacao N:N entre Cliente e Espaco
 CREATE TABLE Agendamento (
     id_agendamento SERIAL PRIMARY KEY,
     data_reserva DATE NOT NULL,
@@ -44,7 +41,6 @@ CREATE TABLE Pagamento (
     FOREIGN KEY (id_agendamento) REFERENCES Agendamento (id_agendamento) ON DELETE CASCADE
 );
 
--- TRIGGER DE VALIDACAO DE CHOQUE DE HORARIOS
 CREATE OR REPLACE FUNCTION func_valida_choque_horario()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -72,3 +68,5 @@ CREATE TRIGGER trg_valida_choque_horario
 BEFORE INSERT ON Agendamento
 FOR EACH ROW
 EXECUTE FUNCTION func_valida_choque_horario();
+
+INSERT INTO Modalidade (nome) VALUES ('Geral');
