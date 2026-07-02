@@ -15,3 +15,7 @@ class Agendamento:
         espaco_info = self.nome_espaco if self.nome_espaco else f"Espaco {self.id_espaco}"
         
         return f"Reserva em {self.data_reserva} ({self.hora_inicio} as {self.hora_fim}) | {cliente_info} em {espaco_info}"
+
+    def __repr__(self):
+        return f"Agendamento(id={self.id_agendamento}, data='{self.data_reserva}', cliente={self.id_cliente}, espaco={self.id_espaco})"
+    

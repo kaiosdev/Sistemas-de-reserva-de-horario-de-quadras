@@ -8,3 +8,6 @@ class Espaco:
 
     def __str__(self):
         return f"Espaco: {self.nome} ({self.tamanho_quadra}) - {self.descricao}"
+
+    def __repr__(self):
+        return f"Espaco(id_espaco={self.id_espaco}, nome='{self.nome}', valor_hora={self.valor_hora})"

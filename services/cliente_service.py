@@ -13,3 +13,6 @@ class ClienteService:
 
     def listar_clientes(self):
         return self.repository.listar_todos()
+
+    def excluir_cliente(self, id_cliente: int):
+        self.repository.excluir(id_cliente)

@@ -1,8 +1,3 @@
-CREATE TABLE Modalidade (
-    id_modalidade SERIAL PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL
-);
-
 CREATE TABLE Cliente (
     id_cliente SERIAL PRIMARY KEY,
     nome VARCHAR(150) NOT NULL,
@@ -16,9 +11,7 @@ CREATE TABLE Espaco (
     nome VARCHAR(100) NOT NULL,
     descricao TEXT,
     tamanho_quadra VARCHAR(50),
-    valor_hora DECIMAL(10, 2) NOT NULL,
-    id_modalidade INT NOT NULL,
-    FOREIGN KEY (id_modalidade) REFERENCES Modalidade (id_modalidade)
+    valor_hora DECIMAL(10, 2) NOT NULL
 );
 
 CREATE TABLE Agendamento (
@@ -37,6 +30,8 @@ CREATE TABLE Pagamento (
     valor_total DECIMAL(10, 2) NOT NULL,
     forma_pagamento VARCHAR(50) NOT NULL,
     status VARCHAR(20) CHECK (status IN ('Pendente', 'Pago', 'Cancelado')) DEFAULT 'Pendente',
+    chave_pix VARCHAR(255),
+    final_cartao VARCHAR(4),
     id_agendamento INT UNIQUE NOT NULL,
     FOREIGN KEY (id_agendamento) REFERENCES Agendamento (id_agendamento) ON DELETE CASCADE
 );
@@ -68,5 +63,3 @@ CREATE TRIGGER trg_valida_choque_horario
 BEFORE INSERT ON Agendamento
 FOR EACH ROW
 EXECUTE FUNCTION func_valida_choque_horario();
-
-INSERT INTO Modalidade (nome) VALUES ('Geral');
