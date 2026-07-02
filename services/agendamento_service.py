@@ -9,9 +9,11 @@ class AgendamentoService:
         ag = Agendamento(0, data, hora_inicio, hora_fim, id_cliente, id_espaco)
         self.repository.inserir(ag)
 
+    def atualizar_agendamento(self, id_agendamento, data, hora_inicio, hora_fim, id_cliente, id_espaco):
+        self.repository.atualizar(id_agendamento, data, hora_inicio, hora_fim, id_cliente, id_espaco)
+
     def listar_agendamentos(self):
         return self.repository.listar_todos()
 
     def excluir_agendamento(self, id_agendamento: int):
-        # Caso tenha implementado o método excluir no repository
-        pass
+        self.repository.excluir(id_agendamento)

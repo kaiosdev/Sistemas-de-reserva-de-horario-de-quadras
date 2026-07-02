@@ -6,9 +6,11 @@ class EspacoService:
         self.repository = EspacoRepository()
 
     def cadastrar_espaco(self, nome, descricao, tamanho, valor):
-        val_float = float(valor.replace(",", "."))
-        espaco = Espaco(0, nome, descricao, tamanho, val_float)
+        espaco = Espaco(0, nome, descricao, tamanho, float(valor.replace(",", ".")))
         self.repository.inserir(espaco)
+
+    def atualizar_espaco(self, id_espaco, nome, descricao, tamanho, valor):
+        self.repository.atualizar(id_espaco, nome, descricao, tamanho, float(valor.replace(",", ".")))
 
     def listar_espacos(self):
         return self.repository.listar_todos()

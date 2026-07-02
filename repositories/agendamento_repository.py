@@ -57,3 +57,30 @@ class AgendamentoRepository:
                 cursor.close()
                 conexao.close()
         return agendamentos
+
+    def atualizar(self, id_agendamento: int, data_reserva: str, hora_inicio: str, hora_fim: str, id_cliente: int, id_espaco: int):
+        conexao = get_connection()
+        if conexao:
+            try:
+                cursor = conexao.cursor()
+                sql = """UPDATE Agendamento SET data_reserva=%s, hora_inicio=%s, hora_fim=%s, id_cliente=%s, id_espaco=%s 
+                         WHERE id_agendamento=%s"""
+                cursor.execute(sql, (data_reserva, hora_inicio, hora_fim, id_cliente, id_espaco, id_agendamento))
+                conexao.commit()
+            except Exception as e:
+                raise Exception(f"{e}")
+            finally:
+                cursor.close()
+                conexao.close()
+
+    def excluir(self, id_agendamento: int):
+        conexao = get_connection()
+        if conexao:
+            try:
+                cursor = conexao.cursor()
+                sql = "DELETE FROM Agendamento WHERE id_agendamento = %s"
+                cursor.execute(sql, (id_agendamento,))
+                conexao.commit()
+            finally:
+                cursor.close()
+                conexao.close()

@@ -47,3 +47,26 @@ class EspacoRepository:
             finally:
                 cursor.close()
                 conexao.close()
+    def atualizar(self, id_espaco: int, nome: str, descricao: str, tamanho_quadra: str, valor_hora: float):
+        conexao = get_connection()
+        if conexao:
+            try:
+                cursor = conexao.cursor()
+                sql = "UPDATE Espaco SET nome=%s, descricao=%s, tamanho_quadra=%s, valor_hora=%s WHERE id_espaco=%s"
+                cursor.execute(sql, (nome, descricao, tamanho_quadra, valor_hora, id_espaco))
+                conexao.commit()
+            finally:
+                cursor.close()
+                conexao.close()
+
+    def excluir(self, id_espaco: int):
+        conexao = get_connection()
+        if conexao:
+            try:
+                cursor = conexao.cursor()
+                sql = "DELETE FROM Espaco WHERE id_espaco = %s"
+                cursor.execute(sql, (id_espaco,))
+                conexao.commit()
+            finally:
+                cursor.close()
+                conexao.close()                
