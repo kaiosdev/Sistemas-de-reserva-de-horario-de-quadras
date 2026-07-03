@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import re
+from tkcalendar import DateEntry
+
 from services.cliente_service import ClienteService
 from services.espaco_service import EspacoService
 from services.agendamento_service import AgendamentoService
@@ -9,14 +11,16 @@ from services.pagamento_service import PagamentoService
 class AthletixApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Athletix - Gestao Esportiva (CRUD Integrado)")
-        self.root.geometry("900x600")
+        self.root.title("Athletix - Gestão de Espaços Esportivos (CRUD Completo)")
+        self.root.geometry("950x650")
         
+        # Instanciação da camada de Serviços (Regras de Negócio)
         self.cliente_service = ClienteService()
         self.espaco_service = EspacoService()
         self.agendamento_service = AgendamentoService()
         self.pagamento_service = PagamentoService()
         
+        # Criação do sistema de abas
         self.notebook = ttk.Notebook(self.root)
         self.notebook.pack(fill="both", expand=True, padx=10, pady=10)
         
@@ -26,53 +30,58 @@ class AthletixApp:
         self.tab_pagamentos = ttk.Frame(self.notebook)
         
         self.notebook.add(self.tab_clientes, text="1. Clientes")
-        self.notebook.add(self.tab_espacos, text="2. Espacos")
-        self.notebook.add(self.tab_agendamentos, text="3. Agendamentos")
+        self.notebook.add(self.tab_espacos, text="2. Espaços")
+        self.notebook.add(self.tab_agendamentos, text="3. Reservas")
         self.notebook.add(self.tab_pagamentos, text="4. Pagamentos")
         
+        # Variáveis de controlo para saber qual ID está selecionado na tabela (Update/Delete)
         self.id_cliente_sel = tk.StringVar()
         self.id_espaco_sel = tk.StringVar()
         self.id_agendamento_sel = tk.StringVar()
         self.id_pagamento_sel = tk.StringVar()
         
+        # Inicialização das interfaces
         self.setup_tab_clientes()
         self.setup_tab_espacos()
         self.setup_tab_agendamentos()
         self.setup_tab_pagamentos()
 
-    # ========================== ABA 1: CLIENTES (CRUD) ==========================
+    # ========================== ABA 1: CLIENTES ==========================
     def setup_tab_clientes(self):
         frame_form = tk.Frame(self.tab_clientes)
         frame_form.pack(pady=10, fill="x", padx=10)
         
         tk.Label(frame_form, text="Nome:").grid(row=0, column=0, sticky="e")
-        self.entry_nome_cli = tk.Entry(frame_form, width=25)
-        self.entry_nome_cli.grid(row=0, column=1, padx=5, pady=2)
+        self.entry_nome_cli = tk.Entry(frame_form, width=30)
+        self.entry_nome_cli.grid(row=0, column=1, padx=5, pady=5)
         
         tk.Label(frame_form, text="CPF:").grid(row=0, column=2, sticky="e")
-        self.entry_cpf_cli = tk.Entry(frame_form, width=15)
-        self.entry_cpf_cli.grid(row=0, column=3, padx=5, pady=2)
+        self.entry_cpf_cli = tk.Entry(frame_form, width=20)
+        self.entry_cpf_cli.grid(row=0, column=3, padx=5, pady=5)
         
-        tk.Label(frame_form, text="Endereco:").grid(row=1, column=0, sticky="e")
-        self.entry_end_cli = tk.Entry(frame_form, width=25)
-        self.entry_end_cli.grid(row=1, column=1, padx=5, pady=2)
+        tk.Label(frame_form, text="Endereço:").grid(row=1, column=0, sticky="e")
+        self.entry_end_cli = tk.Entry(frame_form, width=30)
+        self.entry_end_cli.grid(row=1, column=1, padx=5, pady=5)
         
         tk.Label(frame_form, text="Telefone:").grid(row=1, column=2, sticky="e")
-        self.entry_tel_cli = tk.Entry(frame_form, width=15)
-        self.entry_tel_cli.grid(row=1, column=3, padx=5, pady=2)
+        self.entry_tel_cli = tk.Entry(frame_form, width=20)
+        self.entry_tel_cli.grid(row=1, column=3, padx=5, pady=5)
         
         frame_btn = tk.Frame(self.tab_clientes)
         frame_btn.pack(pady=5)
         tk.Button(frame_btn, text="Salvar Cliente", command=self.salvar_cliente, bg="lightblue").pack(side="left", padx=5)
-        tk.Button(frame_btn, text="Excluir Cliente", command=self.excluir_cliente, bg="salmon").pack(side="left", padx=5)
-        tk.Button(frame_btn, text="Limpar", command=self.limpar_cliente).pack(side="left", padx=5)
+        tk.Button(frame_btn, text="Excluir Selecionado", command=self.excluir_cliente, bg="salmon").pack(side="left", padx=5)
+        tk.Button(frame_btn, text="Limpar Campos", command=self.limpar_cliente).pack(side="left", padx=5)
 
-        colunas = ("ID", "Nome", "CPF", "Endereco", "Telefone")
+        colunas = ("ID", "Nome", "CPF", "Endereço", "Telefone")
         self.tree_clientes = ttk.Treeview(self.tab_clientes, columns=colunas, show="headings", height=12)
-        for c in colunas: self.tree_clientes.heading(c, text=c); self.tree_clientes.column(c, width=150)
+        for c in colunas: 
+            self.tree_clientes.heading(c, text=c)
+            self.tree_clientes.column(c, width=150)
         self.tree_clientes.column("ID", width=50)
         self.tree_clientes.pack(fill="both", expand=True, padx=10, pady=5)
         self.tree_clientes.bind("<ButtonRelease-1>", self.selecionar_cliente)
+        
         self.carregar_clientes()
 
     def carregar_clientes(self):
@@ -96,56 +105,73 @@ class AthletixApp:
         self.entry_end_cli.delete(0, tk.END); self.entry_tel_cli.delete(0, tk.END)
 
     def salvar_cliente(self):
-        t = f"{self.entry_nome_cli.get()};{self.entry_cpf_cli.get()};{self.entry_end_cli.get()};{self.entry_tel_cli.get()}"
+        # Utiliza o padrão exigido com ";" para o Named Constructor de Cliente
+        texto = f"{self.entry_nome_cli.get()};{self.entry_cpf_cli.get()};{self.entry_end_cli.get()};{self.entry_tel_cli.get()}"
         try:
             if self.id_cliente_sel.get():
-                self.cliente_service.atualizar_cliente(int(self.id_cliente_sel.get()), t)
+                self.cliente_service.atualizar_cliente(int(self.id_cliente_sel.get()), texto)
+                messagebox.showinfo("Sucesso", "Cliente atualizado!")
             else:
-                self.cliente_service.cadastrar_cliente_texto(t)
-            self.limpar_cliente(); self.carregar_clientes()
-        except Exception as e: messagebox.showerror("Erro", str(e))
+                self.cliente_service.cadastrar_cliente_texto(texto)
+                messagebox.showinfo("Sucesso", "Cliente inserido!")
+            self.limpar_cliente()
+            self.carregar_clientes()
+        except Exception as e:
+            messagebox.showerror("Erro de Validação", str(e))
 
     def excluir_cliente(self):
         if not self.id_cliente_sel.get(): return
-        try:
-            self.cliente_service.excluir_cliente(int(self.id_cliente_sel.get()))
-            self.limpar_cliente(); self.carregar_clientes()
-        except Exception: messagebox.showerror("Erro Relacional", "Cliente possui agendamentos ativos.")
+        if messagebox.askyesno("Confirmar", "Deseja excluir este cliente?"):
+            try:
+                self.cliente_service.excluir_cliente(int(self.id_cliente_sel.get()))
+                self.limpar_cliente()
+                self.carregar_clientes()
+            except Exception:
+                messagebox.showerror("Erro de BD", "Não é possível excluir. O cliente possui agendamentos ativos.")
 
-    # ========================== ABA 2: ESPAÇOS (CRUD) ==========================
+    # ========================== ABA 2: ESPAÇOS ==========================
     def setup_tab_espacos(self):
         frame_form = tk.Frame(self.tab_espacos)
         frame_form.pack(pady=10, fill="x", padx=10)
         
         tk.Label(frame_form, text="Nome Quadra:").grid(row=0, column=0, sticky="e")
-        self.entry_nome_esp = tk.Entry(frame_form, width=25)
-        self.entry_nome_esp.grid(row=0, column=1, padx=5, pady=2)
+        self.entry_nome_esp = tk.Entry(frame_form, width=30)
+        self.entry_nome_esp.grid(row=0, column=1, padx=5, pady=5)
         
-        tk.Label(frame_form, text="Valor/Hora:").grid(row=0, column=2, sticky="e")
+        tk.Label(frame_form, text="Valor/Hora (R$):").grid(row=0, column=2, sticky="e")
         self.entry_val_esp = tk.Entry(frame_form, width=15)
-        self.entry_val_esp.grid(row=0, column=3, padx=5, pady=2)
+        self.entry_val_esp.grid(row=0, column=3, padx=5, pady=5)
         
-        tk.Label(frame_form, text="Dimensao:").grid(row=1, column=0, sticky="e")
-        self.entry_tam_esp = tk.Entry(frame_form, width=25)
-        self.entry_tam_esp.grid(row=1, column=1, padx=5, pady=2)
+        tk.Label(frame_form, text="Dimensões:").grid(row=1, column=0, sticky="e")
+        self.entry_tam_esp = tk.Entry(frame_form, width=30)
+        self.entry_tam_esp.grid(row=1, column=1, padx=5, pady=5)
+        
+        tk.Label(frame_form, text="Descrição:").grid(row=1, column=2, sticky="e")
+        self.entry_desc_esp = tk.Entry(frame_form, width=25)
+        self.entry_desc_esp.grid(row=1, column=3, padx=5, pady=5)
         
         frame_btn = tk.Frame(self.tab_espacos)
         frame_btn.pack(pady=5)
-        tk.Button(frame_btn, text="Salvar Espaco", command=self.salvar_espaco, bg="lightblue").pack(side="left", padx=5)
-        tk.Button(frame_btn, text="Excluir Espaco", command=self.excluir_espaco, bg="salmon").pack(side="left", padx=5)
+        tk.Button(frame_btn, text="Salvar Espaço", command=self.salvar_espaco, bg="lightblue").pack(side="left", padx=5)
+        tk.Button(frame_btn, text="Excluir Espaço", command=self.excluir_espaco, bg="salmon").pack(side="left", padx=5)
         tk.Button(frame_btn, text="Limpar", command=self.limpar_espaco).pack(side="left", padx=5)
 
-        colunas = ("ID", "Nome", "Dimensao", "Valor/Hora")
+        colunas = ("ID", "Nome", "Dimensões", "Descrição", "Valor/Hora")
         self.tree_espacos = ttk.Treeview(self.tab_espacos, columns=colunas, show="headings", height=12)
-        for c in colunas: self.tree_espacos.heading(c, text=c); self.tree_espacos.column(c, width=180)
+        for c in colunas: 
+            self.tree_espacos.heading(c, text=c)
+            self.tree_espacos.column(c, width=150)
+        self.tree_espacos.column("ID", width=50)
+        
         self.tree_espacos.pack(fill="both", expand=True, padx=10, pady=5)
         self.tree_espacos.bind("<ButtonRelease-1>", self.selecionar_espaco)
+        
         self.carregar_espacos()
 
     def carregar_espacos(self):
         for item in self.tree_espacos.get_children(): self.tree_espacos.delete(item)
         for e in self.espaco_service.listar_espacos():
-            self.tree_espacos.insert("", "end", values=(e.id_espaco, e.nome, e.tamanho_quadra, f"{e.valor_hora:.2f}"))
+            self.tree_espacos.insert("", "end", values=(e.id_espaco, e.nome, e.tamanho_quadra, e.descricao, f"{e.valor_hora:.2f}"))
 
     def selecionar_espaco(self, event):
         sel = self.tree_espacos.selection()
@@ -154,52 +180,73 @@ class AthletixApp:
             self.id_espaco_sel.set(v[0])
             self.entry_nome_esp.delete(0, tk.END); self.entry_nome_esp.insert(0, v[1])
             self.entry_tam_esp.delete(0, tk.END); self.entry_tam_esp.insert(0, v[2])
-            self.entry_val_esp.delete(0, tk.END); self.entry_val_esp.insert(0, v[3])
+            self.entry_desc_esp.delete(0, tk.END); self.entry_desc_esp.insert(0, v[3])
+            self.entry_val_esp.delete(0, tk.END); self.entry_val_esp.insert(0, v[4])
 
     def limpar_espaco(self):
         self.id_espaco_sel.set("")
-        self.entry_nome_esp.delete(0, tk.END); self.entry_tam_esp.delete(0, tk.END); self.entry_val_esp.delete(0, tk.END)
+        self.entry_nome_esp.delete(0, tk.END); self.entry_tam_esp.delete(0, tk.END)
+        self.entry_desc_esp.delete(0, tk.END); self.entry_val_esp.delete(0, tk.END)
 
     def salvar_espaco(self):
+        nome = self.entry_nome_esp.get()
+        desc = self.entry_desc_esp.get()
+        tam = self.entry_tam_esp.get()
+        val = self.entry_val_esp.get()
+        
+        if not nome or not val:
+            messagebox.showwarning("Aviso", "Nome e valor são obrigatórios.")
+            return
+            
         try:
             if self.id_espaco_sel.get():
-                self.espaco_service.atualizar_espaco(int(self.id_espaco_sel.get()), self.entry_nome_esp.get(), "Quadra", self.entry_tam_esp.get(), self.entry_val_esp.get())
+                self.espaco_service.atualizar_espaco(int(self.id_espaco_sel.get()), nome, desc, tam, val)
+                messagebox.showinfo("Sucesso", "Espaço atualizado!")
             else:
-                self.espaco_service.cadastrar_espaco(self.entry_nome_esp.get(), "Quadra", self.entry_tam_esp.get(), self.entry_val_esp.get())
-            self.limpar_espaco(); self.carregar_espacos()
-        except Exception as e: messagebox.showerror("Erro", str(e))
+                self.espaco_service.cadastrar_espaco(nome, desc, tam, val)
+                messagebox.showinfo("Sucesso", "Espaço cadastrado!")
+            self.limpar_espaco()
+            self.carregar_espacos()
+        except Exception as e:
+            messagebox.showerror("Erro", str(e))
 
     def excluir_espaco(self):
         if not self.id_espaco_sel.get(): return
-        try:
-            self.espaco_service.excluir_espaco(int(self.id_espaco_sel.get()))
-            self.limpar_espaco(); self.carregar_espacos()
-        except Exception: messagebox.showerror("Erro Relacional", "Espaco possui agendamentos vinculados.")
+        if messagebox.askyesno("Confirmar", "Deseja excluir este espaço?"):
+            try:
+                self.espaco_service.excluir_espaco(int(self.id_espaco_sel.get()))
+                self.limpar_espaco()
+                self.carregar_espacos()
+            except Exception:
+                messagebox.showerror("Erro de BD", "Espaço possui agendamentos vinculados.")
 
-    # ========================== ABA 3: AGENDAMENTOS (CRUD) ==========================
+    # ========================== ABA 3: AGENDAMENTOS ==========================
     def setup_tab_agendamentos(self):
         frame_form = tk.Frame(self.tab_agendamentos)
         frame_form.pack(pady=10, fill="x", padx=10)
         
-        tk.Button(frame_form, text="🔄 Atualizar Listas Suspenses", command=self.sincronizar_combos).grid(row=0, columnspan=4, pady=5)
+        tk.Button(frame_form, text="🔄 Sincronizar Listas Suspensas", command=self.sincronizar_combos).grid(row=0, columnspan=4, pady=5)
         
         tk.Label(frame_form, text="Cliente:").grid(row=1, column=0, sticky="e")
-        self.combo_clientes = ttk.Combobox(frame_form, width=25, state="readonly")
-        self.combo_clientes.grid(row=1, column=1, padx=5, pady=2)
+        self.combo_clientes = ttk.Combobox(frame_form, width=35, state="readonly")
+        self.combo_clientes.grid(row=1, column=1, padx=5, pady=5)
         
-        tk.Label(frame_form, text="Espaco:").grid(row=1, column=2, sticky="e")
-        self.combo_espacos = ttk.Combobox(frame_form, width=25, state="readonly")
-        self.combo_espacos.grid(row=1, column=3, padx=5, pady=2)
+        tk.Label(frame_form, text="Espaço:").grid(row=1, column=2, sticky="e")
+        self.combo_espacos = ttk.Combobox(frame_form, width=35, state="readonly")
+        self.combo_espacos.grid(row=1, column=3, padx=5, pady=5)
         
-        tk.Label(frame_form, text="Data (AAAA-MM-DD):").grid(row=2, column=0, sticky="e")
-        self.entry_data = tk.Entry(frame_form, width=15)
-        self.entry_data.grid(row=2, column=1, sticky="w", padx=5, pady=2)
+        tk.Label(frame_form, text="Data da Reserva:").grid(row=2, column=0, sticky="e")
         
-        tk.Label(frame_form, text="Inicio / Fim (HH:MM):").grid(row=2, column=2, sticky="e")
+        # Calendário Interativo em vez de texto digitado livremente
+        self.entry_data = DateEntry(frame_form, width=15, background='darkblue', 
+                                    foreground='white', borderwidth=2, date_pattern='yyyy-mm-dd')
+        self.entry_data.grid(row=2, column=1, sticky="w", padx=5, pady=5)
+        
+        tk.Label(frame_form, text="Início / Fim (HH:MM):").grid(row=2, column=2, sticky="e")
         frame_h = tk.Frame(frame_form)
         frame_h.grid(row=2, column=3, sticky="w", padx=5)
         self.entry_ini = tk.Entry(frame_h, width=7); self.entry_ini.pack(side="left")
-        tk.Label(frame_h, text=" as ").pack(side="left")
+        tk.Label(frame_h, text=" às ").pack(side="left")
         self.entry_fim = tk.Entry(frame_h, width=7); self.entry_fim.pack(side="left")
         
         frame_btn = tk.Frame(self.tab_agendamentos)
@@ -208,12 +255,17 @@ class AthletixApp:
         tk.Button(frame_btn, text="Excluir Agendamento", command=self.excluir_agendamento, bg="salmon").pack(side="left", padx=5)
         tk.Button(frame_btn, text="Limpar", command=self.limpar_agendamento).pack(side="left", padx=5)
 
-        colunas = ("ID", "Data", "Inicio", "Fim", "Cliente", "Espaco", "id_c", "id_e")
+        colunas = ("ID", "Data", "Início", "Fim", "Cliente", "Espaço", "id_c", "id_e")
         self.tree_agendamentos = ttk.Treeview(self.tab_agendamentos, columns=colunas, show="headings", height=10)
-        for c in colunas: self.tree_agendamentos.heading(c, text=c); self.tree_agendamentos.column(c, width=120)
-        self.tree_agendamentos.column("id_c", width=0, stretch=False); self.tree_agendamentos.column("id_e", width=0, stretch=False)
+        for c in colunas: 
+            self.tree_agendamentos.heading(c, text=c)
+            self.tree_agendamentos.column(c, width=120)
+        self.tree_agendamentos.column("id_c", width=0, stretch=False) # Esconde as colunas técnicas
+        self.tree_agendamentos.column("id_e", width=0, stretch=False)
+        
         self.tree_agendamentos.pack(fill="both", expand=True, padx=10, pady=5)
         self.tree_agendamentos.bind("<ButtonRelease-1>", self.selecionar_agendamento)
+        
         self.sincronizar_combos()
         self.carregar_agendamentos()
 
@@ -231,7 +283,7 @@ class AthletixApp:
         if sel:
             v = self.tree_agendamentos.item(sel, 'values')
             self.id_agendamento_sel.set(v[0])
-            self.entry_data.delete(0, tk.END); self.entry_data.insert(0, v[1])
+            self.entry_data.set_date(v[1]) # Atualiza o calendário
             self.entry_ini.delete(0, tk.END); self.entry_ini.insert(0, v[2])
             self.entry_fim.delete(0, tk.END); self.entry_fim.insert(0, v[3])
             
@@ -242,68 +294,91 @@ class AthletixApp:
 
     def limpar_agendamento(self):
         self.id_agendamento_sel.set("")
-        self.entry_data.delete(0, tk.END); self.entry_ini.delete(0, tk.END); self.entry_fim.delete(0, tk.END)
+        self.entry_ini.delete(0, tk.END); self.entry_fim.delete(0, tk.END)
         self.combo_clientes.set(""); self.combo_espacos.set("")
 
     def salvar_agendamento(self):
-        if not all([self.combo_clientes.get(), self.combo_espacos.get(), self.entry_data.get(), self.entry_ini.get(), self.entry_fim.get()]): return
+        if not all([self.combo_clientes.get(), self.combo_espacos.get(), self.entry_ini.get(), self.entry_fim.get()]): 
+            messagebox.showwarning("Aviso", "Preencha todos os campos!")
+            return
+        
+        # Validar formato da hora HH:MM
+        if not re.match(r"^\d{2}:\d{2}$", self.entry_ini.get()) or not re.match(r"^\d{2}:\d{2}$", self.entry_fim.get()):
+            messagebox.showerror("Erro", "Formato de hora inválido. Use HH:MM")
+            return
+            
         try:
             id_c = int(self.combo_clientes.get().split(" - ")[0])
             id_e = int(self.combo_espacos.get().split(" - ")[0])
+            
             if self.id_agendamento_sel.get():
                 self.agendamento_service.atualizar_agendamento(int(self.id_agendamento_sel.get()), self.entry_data.get(), self.entry_ini.get(), self.entry_fim.get(), id_c, id_e)
+                messagebox.showinfo("Sucesso", "Reserva atualizada!")
             else:
                 self.agendamento_service.cadastrar_agendamento(self.entry_data.get(), self.entry_ini.get(), self.entry_fim.get(), id_c, id_e)
-            self.limpar_agendamento(); self.carregar_agendamentos()
-        except Exception as e: messagebox.showerror("Bloqueio por Regra (Trigger)", str(e))
+                messagebox.showinfo("Sucesso", "Reserva inserida sem choque de horários!")
+            
+            self.limpar_agendamento()
+            self.carregar_agendamentos()
+        except Exception as e: 
+            messagebox.showerror("Aviso do SGBD (Trigger)", str(e))
 
     def excluir_agendamento(self):
         if not self.id_agendamento_sel.get(): return
-        self.agendamento_service.excluir_agendamento(int(self.id_agendamento_sel.get()))
-        self.limpar_agendamento(); self.carregar_agendamentos()
+        if messagebox.askyesno("Confirmar", "Deseja cancelar esta reserva?"):
+            try:
+                self.agendamento_service.excluir_agendamento(int(self.id_agendamento_sel.get()))
+                self.limpar_agendamento()
+                self.carregar_agendamentos()
+            except Exception as e:
+                messagebox.showerror("Erro", str(e))
 
-    # ========================== ABA 4: PAGAMENTOS (CRUD) ==========================
+    # ========================== ABA 4: PAGAMENTOS ==========================
     def setup_tab_pagamentos(self):
         frame_form = tk.Frame(self.tab_pagamentos)
         frame_form.pack(pady=10, fill="x", padx=10)
         
-        tk.Button(frame_form, text="🔄 Sincronizar Reservas Pendentes", command=self.sincronizar_reservas_pagto).grid(row=0, columnspan=4, pady=5)
+        tk.Button(frame_form, text="🔄 Sincronizar Reservas Cadastradas", command=self.sincronizar_reservas_pagto).grid(row=0, columnspan=4, pady=5)
         
         tk.Label(frame_form, text="Reserva:").grid(row=1, column=0, sticky="e")
-        self.combo_reservas = ttk.Combobox(frame_form, width=40, state="readonly")
-        self.combo_reservas.grid(row=1, column=1, columnspan=3, padx=5, pady=2, sticky="w")
+        self.combo_reservas = ttk.Combobox(frame_form, width=45, state="readonly")
+        self.combo_reservas.grid(row=1, column=1, columnspan=3, padx=5, pady=5, sticky="w")
         
-        tk.Label(frame_form, text="Valor:").grid(row=2, column=0, sticky="e")
+        tk.Label(frame_form, text="Valor a Pagar:").grid(row=2, column=0, sticky="e")
         self.entry_val_pag = tk.Entry(frame_form, width=15)
-        self.entry_val_pag.grid(row=2, column=1, sticky="w", padx=5, pady=2)
+        self.entry_val_pag.grid(row=2, column=1, sticky="w", padx=5, pady=5)
         
         tk.Label(frame_form, text="Forma:").grid(row=2, column=2, sticky="e")
         self.forma_var = tk.StringVar(value="PIX")
         fr_rad = tk.Frame(frame_form)
         fr_rad.grid(row=2, column=3, sticky="w")
         tk.Radiobutton(fr_rad, text="PIX", variable=self.forma_var, value="PIX").pack(side="left")
-        tk.Radiobutton(fr_rad, text="Cartao", variable=self.forma_var, value="CARTAO").pack(side="left")
+        tk.Radiobutton(fr_rad, text="Cartão de Crédito", variable=self.forma_var, value="CARTAO").pack(side="left")
         
-        tk.Label(frame_form, text="Status / Cartao (ou Pix):").grid(row=3, column=0, sticky="e")
+        tk.Label(frame_form, text="Status Atual:").grid(row=3, column=0, sticky="e")
         self.combo_status = ttk.Combobox(frame_form, values=["Pendente", "Pago", "Cancelado"], width=12, state="readonly")
-        self.combo_status.grid(row=3, column=1, sticky="w", padx=5, pady=2)
+        self.combo_status.grid(row=3, column=1, sticky="w", padx=5, pady=5)
         self.combo_status.set("Pendente")
         
+        tk.Label(frame_form, text="Dados (Nº Cartão/Chave PIX):").grid(row=3, column=2, sticky="e")
         self.entry_detalhe = tk.Entry(frame_form, width=25)
-        self.entry_detalhe.grid(row=3, column=2, columnspan=2, sticky="w", padx=5, pady=2)
+        self.entry_detalhe.grid(row=3, column=3, sticky="w", padx=5, pady=5)
         
         frame_btn = tk.Frame(self.tab_pagamentos)
         frame_btn.pack(pady=5)
-        tk.Button(frame_btn, text="Processar / Atualizar", command=self.salvar_pagamento, bg="lightblue").pack(side="left", padx=5)
-        tk.Button(frame_btn, text="Excluir Registro", command=self.excluir_pagamento, bg="salmon").pack(side="left", padx=5)
+        tk.Button(frame_btn, text="Processar Polimorfismo", command=self.salvar_pagamento, bg="lightblue").pack(side="left", padx=5)
+        tk.Button(frame_btn, text="Excluir Histórico", command=self.excluir_pagamento, bg="salmon").pack(side="left", padx=5)
         tk.Button(frame_btn, text="Limpar", command=self.limpar_pagamento).pack(side="left", padx=5)
 
-        colunas = ("ID", "Valor", "Forma", "Status", "Chave/Final", "Cliente", "Espaco", "id_a")
+        colunas = ("ID", "Valor", "Forma", "Status", "Chave/Final", "Cliente", "Espaço", "id_a")
         self.tree_pagamentos = ttk.Treeview(self.tab_pagamentos, columns=colunas, show="headings", height=10)
-        for c in colunas: self.tree_pagamentos.heading(c, text=c); self.tree_pagamentos.column(c, width=110)
+        for c in colunas: 
+            self.tree_pagamentos.heading(c, text=c)
+            self.tree_pagamentos.column(c, width=105)
         self.tree_pagamentos.column("id_a", width=0, stretch=False)
         self.tree_pagamentos.pack(fill="both", expand=True, padx=10, pady=5)
         self.tree_pagamentos.bind("<ButtonRelease-1>", self.selecionar_pagamento)
+        
         self.sincronizar_reservas_pagto()
         self.carregar_pagamentos()
 
@@ -335,22 +410,32 @@ class AthletixApp:
         self.combo_reservas.set(""); self.combo_status.set("Pendente")
 
     def salvar_pagamento(self):
-        if not self.combo_reservas.get() or not self.entry_val_pag.get(): return
+        if not self.combo_reservas.get() or not self.entry_val_pag.get(): 
+            messagebox.showwarning("Aviso", "Selecione a reserva e introduza um valor.")
+            return
+            
         try:
             id_a = int(self.combo_reservas.get().split(" - ")[0])
-            v_tot = float(self.entry_val_pag.get())
+            v_tot = float(self.entry_val_pag.get().replace(",", "."))
             forma = self.forma_var.get()
             
             if self.id_pagamento_sel.get():
+                # Atualização Simples (DML)
                 self.pagamento_service.atualizar_pagamento(int(self.id_pagamento_sel.get()), forma, v_tot, id_a, self.combo_status.get(), self.entry_detalhe.get())
+                messagebox.showinfo("Sucesso", "Status de pagamento atualizado!")
             else:
-                # Dispara o Polimorfismo Real (Algoritmo de Luhn ou Hash Pix) antes de salvar
-                self.pagamento_service.processar_pagamento(forma, v_tot, id_a, numero_cartao=self.entry_detalhe.get())
+                # O processamento aciona a herança e o polimorfismo do sistema:
+                pag = self.pagamento_service.processar_pagamento(forma, v_tot, id_a, numero_cartao=self.entry_detalhe.get())
+                messagebox.showinfo("Sucesso POO", f"Transação aprovada via {forma}.\nMétodo .processar() polimórfico acionado.\nStatus: {pag.status}")
             
-            self.limpar_pagamento(); self.carregar_pagamentos()
-        except Exception as e: messagebox.showerror("Validacao de POO", str(e))
+            self.limpar_pagamento()
+            self.carregar_pagamentos()
+        except Exception as e: 
+            messagebox.showerror("Falha na Validação", str(e))
 
     def excluir_pagamento(self):
         if not self.id_pagamento_sel.get(): return
-        self.pagamento_service.excluir_pagamento(int(self.id_pagamento_sel.get()))
-        self.limpar_pagamento(); self.carregar_pagamentos()
+        if messagebox.askyesno("Confirmar", "Deseja apagar este registo financeiro?"):
+            self.pagamento_service.excluir_pagamento(int(self.id_pagamento_sel.get()))
+            self.limpar_pagamento()
+            self.carregar_pagamentos()

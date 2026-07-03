@@ -14,6 +14,12 @@ CREATE TABLE Espaco (
     valor_hora DECIMAL(10, 2) NOT NULL
 );
 
+CREATE TABLE Modalidade (
+    id_modalidade SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    descricao TEXT
+);
+
 CREATE TABLE Agendamento (
     id_agendamento SERIAL PRIMARY KEY,
     data_reserva DATE NOT NULL,
