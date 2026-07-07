@@ -1,0 +1,12 @@
+# Backend Web (API REST)
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# Banco de dados
+psycopg2-binary>=2.9.9
+
+# Variaveis de ambiente
+python-dotenv>=1.0.0
+
+# Interface Desktop moderna (Tkinter redesenhado)
+customtkinter>=5.2.2

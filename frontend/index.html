@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Athletix — Gestão Esportiva</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- ---------- SIDEBAR (fluxo: Dashboard → Modalidade → Espaço → Cliente → Agendamento → Pagamento) ---------- -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-logo">🏟️</div>
+        <div>
+          <div class="brand-name">ATHLETIX</div>
+          <div class="brand-tag">Gestão Esportiva</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-section-label">Visão Geral</div>
+        <div class="nav-item active" data-view="dashboard">
+          <span class="ico">📊</span> Dashboard
+        </div>
+
+        <div class="nav-section-label">Fluxo de Gestão</div>
+        <div class="nav-item" data-view="modalidades">
+          <span class="ico">🏷️</span> Modalidades
+        </div>
+        <div class="nav-item" data-view="espacos">
+          <span class="ico">🏟️</span> Espaços & Quadras
+        </div>
+        <div class="nav-item" data-view="clientes">
+          <span class="ico">👥</span> Clientes
+        </div>
+        <div class="nav-item" data-view="agendamentos">
+          <span class="ico">📅</span> Agendamentos
+        </div>
+        <div class="nav-item" data-view="pagamentos">
+          <span class="ico">💳</span> Pagamentos
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="status-dot"></span>
+        API conectada · UFAM/ICET
+      </div>
+    </aside>
+    <div class="backdrop-nav" id="backdropNav"></div>
+
+    <!-- ---------- CONTEÚDO ---------- -->
+    <main class="main">
+      <header class="topbar">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+          <div class="page-title">
+            <h1 id="pageTitle">Dashboard</h1>
+            <p id="pageSubtitle">Visão geral do complexo esportivo</p>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-ghost btn-sm" id="refreshBtn">↻ Atualizar</button>
+        </div>
+      </header>
+
+      <section id="viewRoot"><!-- views injetadas aqui --></section>
+    </main>
+  </div>
+
+  <div class="toast-stack" id="toastStack"></div>
+
+  <!-- Scripts: api.js primeiro, depois views, depois app.js -->
+  <script src="js/api.js"></script>
+  <script src="js/views/dashboard.js"></script>
+  <script src="js/views/modalidades.js"></script>
+  <script src="js/views/espacos.js"></script>
+  <script src="js/views/clientes.js"></script>
+  <script src="js/views/agendamentos.js"></script>
+  <script src="js/views/pagamentos.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
