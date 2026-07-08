@@ -2,16 +2,21 @@ from database.connection import get_connection
 from models.agendamento import Agendamento
 
 class AgendamentoRepository:
-    def inserir(self, agendamento: Agendamento):
+    def inserir(self, agendamento: Agendamento, ids_espacos: list):
         conexao = get_connection()
         if conexao:
             try:
                 cursor = conexao.cursor()
-                sql = "INSERT INTO Agendamento (data_reserva, hora_inicio, hora_fim, id_cliente, id_espaco) VALUES (%s, %s, %s, %s, %s)"
-                valores = (agendamento.data_reserva, agendamento.hora_inicio, agendamento.hora_fim, agendamento.id_cliente, agendamento.id_espaco)
-                cursor.execute(sql, valores)
+                sql_ag = "INSERT INTO Agendamento (data_reserva, hora_inicio, hora_fim, id_cliente) VALUES (%s, %s, %s, %s) RETURNING id_agendamento"
+                cursor.execute(sql_ag, (agendamento.data_reserva, agendamento.hora_inicio, agendamento.hora_fim, agendamento.id_cliente))
+                id_gerado = cursor.fetchone()[0]
+                
+                for id_e in ids_espacos:
+                    cursor.execute("INSERT INTO Agendamento_Espaco (id_agendamento, id_espaco) VALUES (%s, %s)", (id_gerado, id_e))
+                
                 conexao.commit()
             except Exception as e:
+                conexao.rollback()
                 raise Exception(f"{e}")
             finally:
                 cursor.close()
@@ -25,49 +30,41 @@ class AgendamentoRepository:
                 cursor = conexao.cursor()
                 sql = """
                     SELECT 
-                        a.id_agendamento, 
-                        a.data_reserva, 
-                        a.hora_inicio, 
-                        a.hora_fim, 
-                        a.id_cliente, 
-                        a.id_espaco,
+                        a.id_agendamento, a.data_reserva, a.hora_inicio, a.hora_fim, a.id_cliente,
                         c.nome AS nome_cliente,
-                        e.nome AS nome_espaco
+                        STRING_AGG(e.nome, ', ') AS espacos_str,
+                        SUM(e.valor_hora) AS valor_total
                     FROM Agendamento a
                     INNER JOIN Cliente c ON a.id_cliente = c.id_cliente
-                    INNER JOIN Espaco e ON a.id_espaco = e.id_espaco
+                    INNER JOIN Agendamento_Espaco ae ON a.id_agendamento = ae.id_agendamento
+                    INNER JOIN Espaco e ON ae.id_espaco = e.id_espaco
+                    GROUP BY a.id_agendamento, a.data_reserva, a.hora_inicio, a.hora_fim, a.id_cliente, c.nome
                 """
                 cursor.execute(sql)
-                registros = cursor.fetchall()
-                for linha in registros:
-                    ag = Agendamento(
-                        id_agendamento=linha[0], 
-                        data_reserva=str(linha[1]), 
-                        hora_inicio=str(linha[2]), 
-                        hora_fim=str(linha[3]), 
-                        id_cliente=linha[4], 
-                        id_espaco=linha[5],
-                        nome_cliente=linha[6],
-                        nome_espaco=linha[7]
-                    )
-                    agendamentos.append(ag)
-            except Exception as e:
-                print(f"Erro ao listar agendamentos: {e}")
+                for linha in cursor.fetchall():
+                    agendamentos.append(Agendamento(linha[0], str(linha[1]), str(linha[2]), str(linha[3]), linha[4], linha[5], linha[6], float(linha[7])))
             finally:
                 cursor.close()
                 conexao.close()
         return agendamentos
-
-    def atualizar(self, id_agendamento: int, data_reserva: str, hora_inicio: str, hora_fim: str, id_cliente: int, id_espaco: int):
+    
+    def atualizar(self, id_agendamento: int, data_reserva: str, hora_inicio: str, hora_fim: str, id_cliente: int, ids_espacos: list):
         conexao = get_connection()
         if conexao:
             try:
                 cursor = conexao.cursor()
-                sql = """UPDATE Agendamento SET data_reserva=%s, hora_inicio=%s, hora_fim=%s, id_cliente=%s, id_espaco=%s 
-                         WHERE id_agendamento=%s"""
-                cursor.execute(sql, (data_reserva, hora_inicio, hora_fim, id_cliente, id_espaco, id_agendamento))
+                sql_ag = """UPDATE Agendamento SET data_reserva=%s, hora_inicio=%s, hora_fim=%s, id_cliente=%s 
+                            WHERE id_agendamento=%s"""
+                cursor.execute(sql_ag, (data_reserva, hora_inicio, hora_fim, id_cliente, id_agendamento))
+                
+                cursor.execute("DELETE FROM Agendamento_Espaco WHERE id_agendamento = %s", (id_agendamento,))
+                
+                for id_e in ids_espacos:
+                    cursor.execute("INSERT INTO Agendamento_Espaco (id_agendamento, id_espaco) VALUES (%s, %s)", (id_agendamento, id_e))
+                
                 conexao.commit()
             except Exception as e:
+                conexao.rollback()
                 raise Exception(f"{e}")
             finally:
                 cursor.close()
@@ -78,8 +75,7 @@ class AgendamentoRepository:
         if conexao:
             try:
                 cursor = conexao.cursor()
-                sql = "DELETE FROM Agendamento WHERE id_agendamento = %s"
-                cursor.execute(sql, (id_agendamento,))
+                cursor.execute("DELETE FROM Agendamento WHERE id_agendamento = %s", (id_agendamento,))
                 conexao.commit()
             finally:
                 cursor.close()

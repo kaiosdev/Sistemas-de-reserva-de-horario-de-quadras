@@ -12,7 +12,7 @@ def get_connection():
             database=os.getenv("DB_NAME"),
             user=os.getenv("DB_USER"),
             password=os.getenv("DB_PASSWORD"),
-            client_encoding='utf8'  # <--- Essa linha resolve o conflito do "ã"
+            client_encoding='utf8'
         )
         return connection
     except Error as e:

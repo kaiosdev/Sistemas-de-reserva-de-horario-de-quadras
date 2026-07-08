@@ -7,11 +7,10 @@ class EspacoRepository:
         if conexao:
             try:
                 cursor = conexao.cursor()
-                # Removido id_modalidade para refletir o MER original
-                sql = "INSERT INTO Espaco (nome, descricao, tamanho_quadra, valor_hora) VALUES (%s, %s, %s, %s) RETURNING id_espaco"
-                valores = (espaco.nome, espaco.descricao, espaco.tamanho_quadra, espaco.valor_hora)
+                sql = """INSERT INTO Espaco (nome, descricao, tamanho_quadra, valor_hora, id_modalidade) 
+                         VALUES (%s, %s, %s, %s, %s) RETURNING id_espaco"""
+                valores = (espaco.nome, espaco.descricao, espaco.tamanho_quadra, espaco.valor_hora, espaco.id_modalidade)
                 cursor.execute(sql, valores)
-                
                 id_gerado = cursor.fetchone()[0]
                 espaco.id_espaco = id_gerado
                 conexao.commit()
@@ -26,34 +25,27 @@ class EspacoRepository:
         if conexao:
             try:
                 cursor = conexao.cursor()
-                # Removido id_modalidade do SELECT
-                sql = "SELECT id_espaco, nome, descricao, tamanho_quadra, valor_hora FROM Espaco ORDER BY id_espaco"
+                # INNER JOIN aplicado para cruzar Espaco com Modalidade
+                sql = """SELECT e.id_espaco, e.nome, e.descricao, e.tamanho_quadra, e.valor_hora, e.id_modalidade, m.nome 
+                         FROM Espaco e
+                         INNER JOIN Modalidade m ON e.id_modalidade = m.id_modalidade
+                         ORDER BY e.id_espaco"""
                 cursor.execute(sql)
                 for linha in cursor.fetchall():
-                    # Instanciando o objeto Espaco apenas com os 5 atributos reais
-                    espacos.append(Espaco(linha[0], linha[1], linha[2], linha[3], float(linha[4])))
+                    espacos.append(Espaco(linha[0], linha[1], linha[2], linha[3], float(linha[4]), linha[5], linha[6]))
             finally:
                 cursor.close()
                 conexao.close()
         return espacos
 
-    def excluir(self, id_espaco: int):
+    def atualizar(self, id_espaco: int, nome: str, descricao: str, tamanho_quadra: str, valor_hora: float, id_modalidade: int):
         conexao = get_connection()
         if conexao:
             try:
                 cursor = conexao.cursor()
-                cursor.execute("DELETE FROM Espaco WHERE id_espaco = %s", (id_espaco,))
-                conexao.commit()
-            finally:
-                cursor.close()
-                conexao.close()
-    def atualizar(self, id_espaco: int, nome: str, descricao: str, tamanho_quadra: str, valor_hora: float):
-        conexao = get_connection()
-        if conexao:
-            try:
-                cursor = conexao.cursor()
-                sql = "UPDATE Espaco SET nome=%s, descricao=%s, tamanho_quadra=%s, valor_hora=%s WHERE id_espaco=%s"
-                cursor.execute(sql, (nome, descricao, tamanho_quadra, valor_hora, id_espaco))
+                sql = """UPDATE Espaco SET nome=%s, descricao=%s, tamanho_quadra=%s, valor_hora=%s, id_modalidade=%s 
+                         WHERE id_espaco=%s"""
+                cursor.execute(sql, (nome, descricao, tamanho_quadra, valor_hora, id_modalidade, id_espaco))
                 conexao.commit()
             finally:
                 cursor.close()
@@ -69,4 +61,4 @@ class EspacoRepository:
                 conexao.commit()
             finally:
                 cursor.close()
-                conexao.close()                
+                conexao.close()

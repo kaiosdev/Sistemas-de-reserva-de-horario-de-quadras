@@ -1,14 +1,13 @@
 class Agendamento:
-    
-    def __init__(self, id_agendamento: int, data_reserva: str, hora_inicio: str, hora_fim: str, id_cliente: int, id_espaco: int, nome_cliente: str = "", nome_espaco: str = ""):
+    def __init__(self, id_agendamento: int, data_reserva: str, hora_inicio: str, hora_fim: str, id_cliente: int, nome_cliente: str = "", espacos_str: str = "", valor_total_espacos: float = 0.0):
         self.id_agendamento = id_agendamento
         self.data_reserva = data_reserva
         self.hora_inicio = hora_inicio
         self.hora_fim = hora_fim
         self.id_cliente = id_cliente
-        self.id_espaco = id_espaco
         self.nome_cliente = nome_cliente
-        self.nome_espaco = nome_espaco
+        self.espacos_str = espacos_str
+        self.valor_total_espacos = valor_total_espacos
 
     def __str__(self):
         cliente_info = self.nome_cliente if self.nome_cliente else f"Cliente {self.id_cliente}"
