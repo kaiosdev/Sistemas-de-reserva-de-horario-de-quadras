@@ -1,7 +1,6 @@
 <div align="center">
   <h1>ATHLETIX</h1>
   <h3>Sistema de Gestão de Espaços Esportivos</h3>
-  <p><i>Projeto Final da Disciplina de Programação Orientada a Objetos (POO)</i></p>
   <p><b>ICET - Universidade Federal do Amazonas (UFAM)</b></p>
 </div>
 
@@ -82,7 +81,7 @@ DB_PASSWORD=sua_senha_do_pgadmin</code></pre>
   <li><strong>Jean Carlos dos Santos Baraúna</strong></li>
 </ul>
 
-<h2>Professor</h2>
-<ul>
-  <li><strong>Prof. Alternei Brito</strong> (Disciplina de Programação Orientada a Objetos)</li>
-</ul>
+<div align="center">
+  <sub>Desenvolvido para a disciplina de Programação Orientada a Objetos· ICET/UFAM<br>
+  Professor: Mrs. Alternei Brito</sub>
+</div>
