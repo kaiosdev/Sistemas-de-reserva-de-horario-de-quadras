@@ -19,7 +19,7 @@ class ClienteService:
     
     def atualizar_cliente(self, id_cliente: int, texto: str):
         from models.cliente import Cliente
-        cli = Cliente.de_texto(texto) # Usa o Named Constructor para validar a string com ";"
+        cli = Cliente.de_texto(texto)
         self.repository.atualizar(id_cliente, cli.nome, cli.cpf, cli.endereco, cli.telefone)
 
     def excluir_cliente(self, id_cliente: int):

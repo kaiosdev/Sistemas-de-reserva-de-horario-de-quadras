@@ -21,12 +21,10 @@ class Cliente:
 
     @classmethod
     def de_texto(cls, texto: str):
-        # Mudamos de "," para ";" para evitar bugs com virgulas em enderecos
         partes = texto.split(";")
         if len(partes) != 4:
             raise ValueError("O texto nao possui a quantidade de campos esperada.")
         
-        # O ID é passado como 0 pois o banco gerará via SERIAL
         return cls(0, partes[0].strip(), partes[1].strip(), partes[2].strip(), partes[3].strip())
 
     def __str__(self):

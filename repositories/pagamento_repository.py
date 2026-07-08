@@ -22,7 +22,6 @@ class PagamentoRepository:
         if conexao:
             try:
                 cursor = conexao.cursor()
-                # A MÁGICA ESTÁ AQUI: O JOIN agora cruza as 4 tabelas corretamente para a relação N:N
                 sql = """
                     SELECT 
                         p.id_pagamento, p.valor_total, p.forma_pagamento, p.status, p.chave_pix, p.final_cartao, p.id_agendamento,

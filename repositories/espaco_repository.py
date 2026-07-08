@@ -25,7 +25,6 @@ class EspacoRepository:
         if conexao:
             try:
                 cursor = conexao.cursor()
-                # INNER JOIN aplicado para cruzar Espaco com Modalidade
                 sql = """SELECT e.id_espaco, e.nome, e.descricao, e.tamanho_quadra, e.valor_hora, e.id_modalidade, m.nome 
                          FROM Espaco e
                          INNER JOIN Modalidade m ON e.id_modalidade = m.id_modalidade
